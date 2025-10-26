@@ -1,7 +1,7 @@
 package com.llmframework.core.model;
 
 import com.llmframework.core.exception.ModelException;
-import java.util.stream.Stream;
+import reactor.core.publisher.Flux;
 
 public interface Model<REQ extends ModelRequest, RESP extends ModelResponse> {
     /**
@@ -10,9 +10,9 @@ public interface Model<REQ extends ModelRequest, RESP extends ModelResponse> {
     RESP call(REQ request) throws ModelException;
     
     /**
-     * 流式调用模型
+     * 流式调用模型（使用 Reactor Flux）
      */
-    Stream<RESP> stream(REQ request) throws ModelException;
+    Flux<RESP> stream(REQ request) throws ModelException;
     
     /**
      * 获取模型元信息

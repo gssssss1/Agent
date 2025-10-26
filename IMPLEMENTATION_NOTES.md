@@ -61,11 +61,17 @@ Support for text, images, audio, and video through:
 - `Content` interface with `ContentType` enum
 - `Message` with list of `Content` objects
 
-### 4. Streaming Support
-Native Java Stream API integration:
+### 4. Streaming Support (使用 Reactor Flux)
+Reactive streaming with Project Reactor:
 ```java
-Stream<RESP> stream(REQ request)
+Flux<RESP> stream(REQ request)
 ```
+**Key Change**: Uses Reactor Flux instead of Java Stream for:
+- Non-blocking asynchronous processing
+- Built-in backpressure support
+- Rich operators for stream manipulation
+- Better error handling and retry capabilities
+- See `REACTIVE_STREAMING.md` for details
 
 ### 5. Function Calling
 Complete function calling support:

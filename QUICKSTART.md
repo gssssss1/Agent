@@ -46,10 +46,12 @@ All models implement `Model<REQ, RESP>`:
 ```java
 public interface Model<REQ extends ModelRequest, RESP extends ModelResponse> {
     RESP call(REQ request);
-    Stream<RESP> stream(REQ request);
+    Flux<RESP> stream(REQ request);  // 使用 Reactor Flux
     ModelMetadata getMetadata();
 }
 ```
+
+**注意**: 流式调用使用 **Reactor Flux** 而不是 Java Stream。详见 [REACTIVE_STREAMING.md](REACTIVE_STREAMING.md)。
 
 ### 2. Request/Response Pattern
 

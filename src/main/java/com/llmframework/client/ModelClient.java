@@ -3,7 +3,7 @@ package com.llmframework.client;
 import com.llmframework.core.exception.ModelException;
 import com.llmframework.core.model.ModelRequest;
 import com.llmframework.core.model.ModelResponse;
-import java.util.stream.Stream;
+import reactor.core.publisher.Flux;
 
 public interface ModelClient {
     /**
@@ -13,8 +13,8 @@ public interface ModelClient {
         RESP execute(REQ request, Class<RESP> responseClass) throws ModelException;
     
     /**
-     * 执行流式请求
+     * 执行流式请求（使用 Reactor Flux）
      */
     <REQ extends ModelRequest, RESP extends ModelResponse> 
-        Stream<RESP> executeStream(REQ request, Class<RESP> responseClass) throws ModelException;
+        Flux<RESP> executeStream(REQ request, Class<RESP> responseClass) throws ModelException;
 }

@@ -148,13 +148,22 @@ ChatModelResponse response = chatModel.chat(messages);
 System.out.println(response.getMessage().getContent());
 ```
 
-### Streaming Example
+### Streaming Example (使用 Reactor Flux)
 
 ```java
-model.stream(request).forEach(chunk -> {
-    System.out.print(chunk.getMessage().getContent());
-});
+// 订阅流式响应
+Flux<ChatModelResponse> flux = model.stream(request);
+flux.subscribe(
+    chunk -> System.out.print(extractText(chunk)),
+    error -> System.err.println("Error: " + error),
+    () -> System.out.println("\nDone!")
+);
+
+// 或使用 StreamHandler
+FluxStreamHandler.subscribe(flux, handler);
 ```
+
+详见 [REACTIVE_STREAMING.md](REACTIVE_STREAMING.md) 了解更多关于 Reactor Flux 的用法。
 
 ### With Retry Strategy
 
@@ -177,15 +186,18 @@ ModelObserver observer = new LoggingObserver();
 
 ## Dependencies
 
-Core dependencies are minimal:
-- SLF4J (logging abstraction)
-- Jackson or Gson (JSON processing)
+Core dependencies:
+- **SLF4J 2.0.9** - Logging abstraction
+- **Reactor Core 3.6.0** - Reactive streams with Flux/Mono
+- **JUnit 5** (test) - Unit testing
 
-Optional dependencies:
-- OkHttp (HTTP client)
-- Micrometer (metrics)
-- OpenTelemetry (tracing)
-- Redis client (Redis memory backend)
+Optional dependencies for implementations:
+- Jackson or Gson - JSON processing
+- OkHttp - HTTP client
+- Micrometer - Metrics collection
+- OpenTelemetry - Distributed tracing
+- Redis client - Redis memory backend
+- Reactor Test (test) - Testing reactive streams
 
 ## Design Patterns
 

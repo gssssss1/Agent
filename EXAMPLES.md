@@ -128,24 +128,37 @@ List<Message> messages = List.of(message);
 ChatModelResponse response = chatModel.chat(messages);
 ```
 
-## Streaming Responses
+## Streaming Responses (使用 Reactor Flux)
+
+本框架使用 Project Reactor 的 `Flux` 来处理流式响应。详细信息请参见 [REACTIVE_STREAMING.md](REACTIVE_STREAMING.md)。
 
 ### Basic Streaming
 
 ```java
 import com.llmframework.parser.*;
-import java.util.stream.Stream;
+import reactor.core.publisher.Flux;
 
 ChatModelRequest request = createYourRequest();
 
-// Use Stream API
-Stream<ChatModelResponse> stream = chatModel.stream(request);
-stream.forEach(chunk -> {
-    if (chunk.getMessage() != null && !chunk.getMessage().getContents().isEmpty()) {
-        String content = chunk.getMessage().getContents().get(0).getValue().toString();
-        System.out.print(content);
+// 使用 Reactor Flux
+Flux<ChatModelResponse> flux = chatModel.stream(request);
+flux.subscribe(
+    chunk -> {
+        // 处理每个数据块
+        if (chunk.getMessage() != null && !chunk.getMessage().getContents().isEmpty()) {
+            String content = chunk.getMessage().getContents().get(0).getValue().toString();
+            System.out.print(content);
+        }
+    },
+    error -> {
+        // 处理错误
+        System.err.println("Error: " + error.getMessage());
+    },
+    () -> {
+        // 完成
+        System.out.println("\nStreaming completed!");
     }
-});
+);
 ```
 
 ### Streaming with Handler
@@ -180,8 +193,32 @@ StreamHandler<ChatModelResponse> handler = new StreamHandler<>() {
     }
 };
 
-chatModel.stream(request).forEach(handler::onChunk);
-handler.onComplete();
+// 使用 FluxStreamHandler 工具类
+Flux<ChatModelResponse> flux = chatModel.stream(request);
+FluxStreamHandler.subscribe(flux, handler);
+```
+
+### Advanced Flux Operations
+
+```java
+Flux<ChatModelResponse> flux = chatModel.stream(request);
+
+// 提取并累积文本
+flux
+    .map(response -> extractText(response))
+    .filter(text -> !text.isEmpty())
+    .scan("", (accumulated, chunk) -> accumulated + chunk)
+    .subscribe(System.out::println);
+
+// 带超时和重试
+flux
+    .timeout(Duration.ofSeconds(30))
+    .retry(3)
+    .onErrorResume(error -> {
+        log.error("Stream failed, using fallback", error);
+        return fallbackModel.stream(request);
+    })
+    .subscribe(this::processChunk);
 ```
 
 ## Conversation Memory
