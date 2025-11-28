@@ -9,7 +9,8 @@ import java.time.Duration;
 public record EngineConfiguration(
         int virtualThreadPoolSize,
         int queueCapacity,
-        Duration shutdownTimeout
+        Duration shutdownTimeout,
+        BackpressureStrategy backpressureStrategy
 ) {
     
     // Default configuration
@@ -17,7 +18,8 @@ public record EngineConfiguration(
         return new EngineConfiguration(
                 Runtime.getRuntime().availableProcessors() * 2,
                 1024,
-                Duration.ofSeconds(30)
+                Duration.ofSeconds(30),
+                BackpressureStrategy.BLOCK_PRODUCER
         );
     }
 }
